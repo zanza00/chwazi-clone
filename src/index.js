@@ -82,12 +82,14 @@ function handleStart(evt) {
   const el = document.getElementById("canvas");
   const ctx = el.getContext("2d");
   const touches = evt.changedTouches;
-  // clearTimeout(timer);
-  // timer = setTimeout(() => {
-  //   const rnd = getRandomInt(ongoingTouches.length);
-  //   ctx.fillStyle = colorForTouch({ identifier: rnd });
-  //   ctx.fillRect(0, 0, el.width, el.height);
-  // }, 2000);
+  clearTimeout(timer);
+  timer = setTimeout(() => {
+    const rnd = getRandomInt(ongoingTouches.length);
+    const color = colorForTouch({ identifier: rnd });
+    ctx.fillStyle = color;
+    ctx.fillRect(0, 0, el.width, el.height);
+    log(`Winner of the raffle is id ${rnd} with color ${color}`);
+  }, 2000);
 
   for (let i = 0; i < touches.length; i++) {
     log(`touchstart: ${i}.`);
@@ -163,6 +165,8 @@ function startup() {
   el.width = window.innerWidth;
   el.height = window.innerHeight - 200;
 
+  log(`H:${window.innerHeight} W: ${window.innerWidth}`);
+
   el.addEventListener("touchstart", handleStart);
   el.addEventListener("touchend", handleEnd);
   el.addEventListener("touchcancel", handleCancel);
@@ -171,6 +175,15 @@ function startup() {
   log("Initialized.");
 }
 
-// document.addEventListener("DOMContentLoaded", startup);
+function resizeCanvas() {
+  const el = document.getElementById("canvas");
+
+  el.width = window.innerWidth;
+  el.height = window.innerHeight - 200;
+
+  log(`H:${window.innerHeight} W: ${window.innerWidth}`);
+}
+
+window.addEventListener("resize", resizeCanvas);
 
 startup();
