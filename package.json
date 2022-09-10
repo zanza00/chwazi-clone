@@ -1,7 +1,7 @@
 {
-  "name": "vanilla",
+  "name": "chwazi-clone",
   "version": "1.0.0",
-  "description": "JavaScript example starter project",
+  "description": "a clone of chwazi",
   "main": "index.html",
   "scripts": {
     "start": "parcel index.html --open",
@@ -9,11 +9,9 @@
   },
   "dependencies": { "parcel-bundler": "^1.6.1" },
   "devDependencies": {
-    "@babel/core": "7.2.0",
     "typescript": "4.4.4"
   },
   "resolutions": {
     "@babel/preset-env": "7.13.8"
-  },
-  "keywords": ["javascript", "starter"]
+  }
 }

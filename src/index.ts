@@ -1,6 +1,6 @@
 import "./styles.css";
 
-const ongoingTouches = [];
+const ongoingTouches: ClonedTouch[] = [];
 
 function getRandomColor() {
   var letters = "0123456789ABCDEF";
@@ -11,26 +11,31 @@ function getRandomColor() {
   return color;
 }
 
-function getRandomInt(max) {
+function getRandomInt(max: number) {
   return Math.floor(Math.random() * max);
 }
 
-const colorTable = [];
+const colorTable: string[] = [];
 
 const circleDiameter = 40;
 
-let timer = 0;
+let timer: NodeJS.Timeout;
 
-function log(msg) {
+function log(msg: string) {
   const container = document.getElementById("log");
   container.textContent = `${msg} \n${container.textContent}`;
 }
 
-function colorForTouch(touch) {
+function colorForTouch(touch: Touch) {
   return colorTable[touch.identifier];
 }
 
-function copyTouch({ identifier, pageX, pageY }) {
+type ClonedTouch = {
+  identifier: Touch["identifier"];
+  pageX: Touch["pageX"];
+  pageY: Touch["pageY"];
+};
+function copyTouch({ identifier, pageX, pageY }: Touch): ClonedTouch {
   return { identifier, pageX, pageY };
 }
 
@@ -76,16 +81,16 @@ function drawShape(ctx, touches, i, color) {
   ctx.fill();
 }
 
-function handleStart(evt) {
+function handleStart(evt: TouchEvent) {
   evt.preventDefault();
   log("touchstart.");
-  const el = document.getElementById("canvas");
+  const el = document.getElementsByTagName("canvas")[0];
   const ctx = el.getContext("2d");
   const touches = evt.changedTouches;
   clearTimeout(timer);
   timer = setTimeout(() => {
     const rnd = getRandomInt(ongoingTouches.length);
-    const color = colorForTouch({ identifier: rnd });
+    const color = colorForTouch({ identifier: rnd } as Touch);
     ctx.fillStyle = color;
     ctx.fillRect(0, 0, el.width, el.height);
     log(`Winner of the raffle is id ${rnd} with color ${color}`);
@@ -101,37 +106,33 @@ function handleStart(evt) {
   }
 }
 
-function handleMove(evt) {
+function handleMove(evt: TouchEvent) {
   evt.preventDefault();
-  const el = document.getElementById("canvas");
+  const el = document.getElementsByTagName("canvas")[0];
   const ctx = el.getContext("2d");
   const touches = evt.changedTouches;
 
-  ctx.clearRect(0, 0, el.width, el.height);
   for (let i = 0; i < touches.length; i++) {
-    const color = colorForTouch(touches[i]);
     const idx = ongoingTouchIndexById(touches[i].identifier);
 
     if (idx >= 0) {
-      log(`continuing touch ${idx}`);
-      ctx.beginPath();
-      log(
-        `ctx.moveTo( ${ongoingTouches[idx].pageX}, ${ongoingTouches[idx].pageY} );`
-      );
-
       ongoingTouches.splice(idx, 1, copyTouch(touches[i])); // swap in the new touch record
     } else {
       log("can't figure out which touch to continue");
     }
+  }
 
-    drawShape(ctx, touches, i, color);
+  ctx.clearRect(0, 0, el.width, el.height);
+  for (let idx = 0; idx < ongoingTouches.length; idx++) {
+    const color = colorTable[idx];
+    drawShape(ctx, touches, idx, color);
   }
 }
 
-function handleEnd(evt) {
+function handleEnd(evt: TouchEvent) {
   evt.preventDefault();
   log("touchend");
-  const el = document.getElementById("canvas");
+  const el = document.getElementsByTagName("canvas")[0];
   const ctx = el.getContext("2d");
   const touches = evt.changedTouches;
 
@@ -148,7 +149,7 @@ function handleEnd(evt) {
   }
 }
 
-function handleCancel(evt) {
+function handleCancel(evt: TouchEvent) {
   evt.preventDefault();
   log("touchcancel.");
   const touches = evt.changedTouches;
@@ -156,11 +157,15 @@ function handleCancel(evt) {
   for (let i = 0; i < touches.length; i++) {
     let idx = ongoingTouchIndexById(touches[i].identifier);
     ongoingTouches.splice(idx, 1); // remove it; we're done
+    colorTable.splice(idx, 1); // remove it; we're done
+  }
+  if (ongoingTouches.length === 0) {
+    clearTimeout(timer);
   }
 }
 
 function startup() {
-  const el = document.getElementById("canvas");
+  const el = document.getElementsByTagName("canvas")[0];
 
   el.width = window.innerWidth;
   el.height = window.innerHeight - 200;
@@ -176,7 +181,7 @@ function startup() {
 }
 
 function resizeCanvas() {
-  const el = document.getElementById("canvas");
+  const el = document.getElementsByTagName("canvas")[0];
 
   el.width = window.innerWidth;
   el.height = window.innerHeight - 200;
